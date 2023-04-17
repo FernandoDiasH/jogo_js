@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+
+    <div class="container">
+        <canvas id="screenGame" width="10" height="10"></canvas>
+    </div>
+
+    <script type="module">
+        const screen = document.getElementById('screenGame')
+        let context = screen.getContext("2d")
+
+        let player = {
+            x: Math.floor(Math.random() * 10),
+            y: Math.floor(Math.random() * 10)
+        }
+
+        context.fillStyle = "#000000"
+        context.fillRect(player.x, player.y, 1, 1)
+
+        addEventListener('keydown', (event)=>{
+
+            context.clearRect(player.x, player.y, 1, 1)    
+    
+            if(event.code === "ArrowUp"){
+                player.y = player.y - 1
+                context.fillRect(player.x, player.y, 1, 1)
+            }
+
+            if(event.code === "ArrowDown"){
+                player.y = player.y + 1
+                context.fillRect(player.x, player.y, 1, 1)
+            }
+
+            if(event.code === "ArrowRight"){
+                player.x = player.x + 1
+                context.fillRect(player.x, player.y, 1, 1)
+            }
+
+            if(event.code === "ArrowLeft"){
+                player.x = player.x - 1
+                context.fillRect(player.x, player.y, 1, 1)
+            }
+        })
+
+    </script>
+</body>
+</html>

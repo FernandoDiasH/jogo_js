@@ -15,42 +15,107 @@
     </div>
 
     <script type="module">
+
         const screen = document.getElementById('screenGame')
         let context = screen.getContext("2d")
 
-        let player = {
-            x: Math.floor(Math.random() * 10),
-            y: Math.floor(Math.random() * 10)
+        function Game(){
+            let state = {
+                fruits:{}
+            }
+
+            function addPlayer(name){
+                state[name] = {
+                    x: Math.floor(Math.random() * 10),
+                    y: Math.floor(Math.random() * 10)
+                }
+            }
+
+            function addFruit(){
+                let timeStamp = Date.now()
+
+                state.fruits[timeStamp] = {
+                    x: Math.floor(Math.random() * 10),
+                    y: Math.floor(Math.random() * 10)
+                }
+            }
+
+            function removeFruit(fruit){
+                delete state.fruits[fruit]
+            }
+
+            function movePlayer(player, keyPress){
+                if(keyPress === "ArrowUp"){
+                    if( state[player].y - 1 >= 0 ){
+                        state[player].y -- 
+                    }
+                }
+
+                if(keyPress === "ArrowDown"){
+                    if(state[player].y + 1 <= 9 ){
+                        state[player].y ++ 
+                    }
+                }
+
+                if(keyPress == "ArrowRight"){
+                    if(state[player].x + 1 <= 9){
+                        state[player].x ++
+                    }
+                }
+
+                if(keyPress == "ArrowLeft"){
+                    if(state[player].x - 1 >= 0 ){
+                        state[player].x --
+                    }
+                }
+
+                for(let fruit in state.fruits){
+                    if(state.fruits[fruit].x  == state[player].x && state.fruits[fruit].y  == state[player].y){
+                        removeFruit(fruit)
+                    }
+                }
+            }
+
+            return {
+                state,
+                addPlayer,
+                movePlayer,
+                addFruit,
+            }
         }
 
-        context.fillStyle = "#000000"
-        context.fillRect(player.x, player.y, 1, 1)
+        // let socket = io()
+        let game = Game()
+        game.addPlayer("player1")
+        game.addPlayer("player2")
+        game.addFruit()
+        game.addFruit()
+        
+
+        let renderScreen =  (context, state) => {
+            for (const player in state) {
+
+                context.fillStyle = "#000000"
+                context.clearRect(state[player].x, state[player].y, 1 , 1)
+                context.fillRect(state[player].x, state[player].y, 1, 1)
+
+            }
+
+            for(const fruit in state.fruits){
+                context.fillStyle = "#17E000"
+                context.fillRect(state.fruits[fruit].x, state.fruits[fruit].y, 1, 1)
+            }
+
+        }
 
         addEventListener('keydown', (event)=>{
-
-            context.clearRect(player.x, player.y, 1, 1)    
-    
-            if(event.code === "ArrowUp"){
-                player.y = player.y - 1
-                context.fillRect(player.x, player.y, 1, 1)
-            }
-
-            if(event.code === "ArrowDown"){
-                player.y = player.y + 1
-                context.fillRect(player.x, player.y, 1, 1)
-            }
-
-            if(event.code === "ArrowRight"){
-                player.x = player.x + 1
-                context.fillRect(player.x, player.y, 1, 1)
-            }
-
-            if(event.code === "ArrowLeft"){
-                player.x = player.x - 1
-                context.fillRect(player.x, player.y, 1, 1)
-            }
+            context.clearRect(game.state.player1.x, game.state.player1.y, 1 , 1)
+            game.movePlayer("player1", event.code)
+            requestAnimationFrame(()=> renderScreen(context, game.state))
         })
 
+        requestAnimationFrame(()=> renderScreen(context, game.state))
+        console.log(game.state)
     </script>
 </body>
 </html>

@@ -1,52 +1,92 @@
 import  express  from 'express'
 import { Server } from 'socket.io'
 import { createServer } from 'http'
+import createGame from './public/game.js'
 
 const app = express()
 const httpServer = createServer(app)
-const io = new Server(httpServer)
+const sockets = new Server(httpServer)
 
 app.use(express.static('public'))
 
-let game = {}
-
-io.on("connection", (socket)=>{
-
-    game[socket.id] = {
-        x: Math.floor(Math.random() * 10),
-        y: Math.floor(Math.random() * 10)
+let state = {
+    players: {},
+    fruits:{
+        1:{
+            x: Math.floor(Math.random() * 10 ),
+            y: Math.floor(Math.random() * 10 ),
+        },
+        2:{
+            x: Math.floor(Math.random() * 10 ),
+            y: Math.floor(Math.random() * 10 ),
+        },
+        3:{
+            x: Math.floor(Math.random() * 10 ),
+            y: Math.floor(Math.random() * 10 ),
+        },
     }
-    
-    socket.on('keyPress', (key)=>{
-        if(key=== "ArrowUp"){
-            if( game[socket.id].y - 1 >= 0 ){
-                game[socket.id].y --
-            }
-        }
+ } 
 
-        if(key === "ArrowDown"){
-            if(game[socket.id].y + 1 <= 9 ){
-                game[socket.id].y ++
-            }
-        }
+ sockets.on("connection", (socket)=>{
+    const playerID = socket.id 
+    console.log(` player conectado: ${playerID}`)
 
-        if(key == "ArrowRight"){
-            if(game[socket.id].x + 1 <= 9){
-                game[socket.id].x ++
-            }
-        }
-
-        if(key == "ArrowLeft"){
-            if(game[socket.id].x - 1 >= 0 ){
-                game[socket.id].x --
-            }
-        }
-        io.emit('game', game)
+    socket.on('disconnect', ()=>{
+        delete state.players[socket.id]
+        console.log(`player desconectado: ${playerID} `);
     })
 
-    console.log(game);
-    io.emit('game', game)
-    
+    socket.emit('setup', state)
+
+    state.players[socket.id] = {
+        x: Math.floor(Math.random() * 10 ),
+        y: Math.floor(Math.random() * 10 ),
+    }
+
+    sockets.emit('add-player', state)
+
+    socket.on('movePlayer',(value)=>{
+
+        let movementAccepted = {
+            ArrowUp: ( player, state ) => {
+                if( state.players[player].y - 1 >= 0 ){
+                     state.players[player].y -- 
+                     return state
+                }
+                return state
+            },
+            ArrowDown: ( player, state ) => {
+                if( state.players[player].y + 1 < 10 ){
+                     state.players[player].y ++ 
+                     return state
+                }
+                return state
+            },
+            ArrowLeft: ( player, state ) => {
+                if( state.players[player].x - 1 >= 0 ){
+                     state.players[player].x -- 
+                     return state
+                }
+                return state
+            },
+            ArrowRight: ( player, state ) => {
+                if( state.players[player].x + 1 < 10 ){
+                     state.players[player].x ++ 
+                     return state
+                }
+                return state
+            },
+        }
+
+        let moveFunction = movementAccepted[value.keypress]
+
+        let player = state.players[value.playerId]
+
+        if(moveFunction){
+            state =  moveFunction(value.playerId, state)
+            sockets.emit('player-moved', state)
+        }
+    })
 }) 
 
 

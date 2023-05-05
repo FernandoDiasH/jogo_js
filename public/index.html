@@ -42,6 +42,10 @@
             game.state = state
         })
 
+        // socket.on('add-fruit', (state)=>{
+        //     game.state = state
+        // })
+
         addEventListener('keydown', (event)=>{
             socket.emit('movePlayer', {keypress: event.code, playerId: socket.id})
         })

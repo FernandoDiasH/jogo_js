@@ -45,45 +45,67 @@ let state = {
 
     sockets.emit('add-player', state)
 
+
+
+    setInterval(()=>{
+        let fruitId = Math.random() * 10000
+
+        state.fruits[fruitId]  = {
+            x: Math.floor(Math.random() * 10 ),
+            y: Math.floor(Math.random() * 10 ),
+        }
+
+        socket.emit('add-fruit', state)
+
+    }, 4000 )
+
+
     socket.on('movePlayer',(value)=>{
 
         let movementAccepted = {
-            ArrowUp: ( player, state ) => {
-                if( state.players[player].y - 1 >= 0 ){
-                     state.players[player].y -- 
-                     return state
+            ArrowUp: ( player ) => {
+                if( player.y - 1 >= 0 ){
+                     player.y -- 
+                     return player
                 }
-                return state
+                return player
             },
-            ArrowDown: ( player, state ) => {
-                if( state.players[player].y + 1 < 10 ){
-                     state.players[player].y ++ 
-                     return state
+            ArrowDown: ( player ) => {
+                if( player.y + 1 < 10 ){
+                     player.y ++ 
+                     return player
                 }
-                return state
+                return player
             },
-            ArrowLeft: ( player, state ) => {
-                if( state.players[player].x - 1 >= 0 ){
-                     state.players[player].x -- 
-                     return state
+            ArrowLeft: ( player ) => {
+                if( player.x - 1 >= 0 ){
+                     player.x -- 
+                     return player
                 }
-                return state
+                return player
             },
-            ArrowRight: ( player, state ) => {
-                if( state.players[player].x + 1 < 10 ){
-                     state.players[player].x ++ 
-                     return state
+            ArrowRight: ( player ) => {
+                if( player.x + 1 < 10 ){
+                     player.x ++ 
+                     return player
                 }
-                return state
+                return player
             },
         }
 
         let moveFunction = movementAccepted[value.keypress]
-
         let player = state.players[value.playerId]
 
         if(moveFunction){
-            state =  moveFunction(value.playerId, state)
+             player = moveFunction(player)
+             for(const fruitId in state.fruits){
+                let fruit = state.fruits[fruitId]
+                if(fruit.x == player.x && fruit.y === player.y ){
+                    delete state.fruits[fruitId]
+                }
+            }
+
+            state.players[value.playerId] = player
             sockets.emit('player-moved', state)
         }
     })

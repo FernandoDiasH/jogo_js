@@ -47,17 +47,17 @@ let state = {
 
 
 
-    // setInterval(()=>{
-    //     let fruitId = Math.random() * 10000
+    setInterval(()=>{
+        let fruitId = Math.random() * 10000
 
-    //     state.fruits[fruitId]  = {
-    //         x: Math.floor(Math.random() * 10 ),
-    //         y: Math.floor(Math.random() * 10 ),
-    //     }
+        state.fruits[fruitId]  = {
+            x: Math.floor(Math.random() * 10 ),
+            y: Math.floor(Math.random() * 10 ),
+        }
 
-    //     // socket.emit('add-fruit', state)
+        socket.emit('add-fruit', state)
 
-    // }, 4000 )
+    }, 10000 )
 
 
     socket.on('movePlayer',(value)=>{
